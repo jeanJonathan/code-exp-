@@ -39,13 +39,16 @@ function manageColumns(sheet: ExcelScript.Worksheet, lastRow: number) {
 function manageSearchKeys(sheet: ExcelScript.Worksheet, lastRow: number) {
     // Ajout de clés de recherche
     sheet.getRange("A:A").insert(ExcelScript.InsertShiftDirection.right);
-    sheet.getRange("A1").setFormulaLocal("concat");
+    sheet.getRange("A1").setFormulaLocal("concat");  // Cette formule est symbolique et probablement inutile si nous ne la définissons pas correctement juste après
 
     // Appliquer la formule manuellement sur chaque cellule de A2 à lastRow
     for (let i = 2; i <= lastRow; i++) {
-        sheet.getRange("A" + i).setFormulaLocal("=concatener(E" + i + ";H" + i + ")");
+        // Vérification: Utilisation correcte de la fonction CONCATENER en supposant que la concaténation correcte est entre les colonnes E et H
+        let formula = `=CONCATENATE(E${i}, H${i})`; // Ajustez selon la fonction correcte de concaténation disponible dans votre version d'Excel
+        sheet.getRange("A" + i).setFormulaLocal(formula);
     }
 }
+
 
 
 
