@@ -11,24 +11,24 @@ function processData(extractionSheet: ExcelScript.Worksheet, motmodSheet: ExcelS
     let lastRow = extractionSheet.getUsedRange().getLastRow().getRowIndex();
 
     // Préparation de la feuille d'extraction
-    prepareExtractionSheet(extractionSheet, lastRow);
+    prepareExtractionSheet(extractionSheet);
 
     // Mise à jour des données vers la feuille MOTMOD
-    updateDataToMOTMOD(extractionSheet, motmodSheet, lastRow);
+    updateDataToMOTMOD(extractionSheet, motmodSheet);
 
     // Mise en forme de la feuille MOTMOD
-    formatMOTMODSheet(motmodSheet, lastRow);
+    formatMOTMODSheet(motmodSheet);
 }
 
-function prepareExtractionSheet(extractionSheet: ExcelScript.Worksheet, lastRow: number) {
+function prepareExtractionSheet(sheet: ExcelScript.Worksheet) {
     // Réglages initiaux pour la hauteur des lignes
-    extractionSheet.getRange("A:XFD").getFormat().setRowHeight(15.75);
+    sheet.getRange("A:XFD").getFormat().setRowHeight(15.75);
 
     // Suppression et réorganisation des colonnes
-    manageColumns(extractionSheet);
+    manageColumns(sheet);
 
     // Insertion et gestion de clés pour la recherche
-    manageSearchKeys(extractionSheet, lastRow);
+    manageSearchKeys(sheet);
 }
 
 function manageColumns(sheet: ExcelScript.Worksheet) {
@@ -52,26 +52,26 @@ function manageColumns(sheet: ExcelScript.Worksheet) {
     sheet.getRange("A:N").getFormat().autofitColumns();
 }
 
-function manageSearchKeys(sheet: ExcelScript.Worksheet, lastRow: number) {
+function manageSearchKeys(sheet: ExcelScript.Worksheet) {
     // Ajout de clés de recherche
     sheet.getRange("A:A").insert(ExcelScript.InsertShiftDirection.right);
     sheet.getRange("A1").setFormulaLocal("concat");
     sheet.getRange("A2").setFormulaLocal("=concatener(E2;H2)");
-    sheet.getRange("A2:A" + lastRow).autoFill();
+    sheet.getRange("A2:A" + sheet.getUsedRange().getLastRow().getRowIndex()).autoFill();
 }
 
-function updateDataToMOTMOD(extractionSheet: ExcelScript.Worksheet, motmodSheet: ExcelScript.Worksheet, lastRow: number) {
+function updateDataToMOTMOD(extractionSheet: ExcelScript.Worksheet, motmodSheet: ExcelScript.Worksheet) {
     // Copie des données depuis Extraction MOTMOD vers MOTMOD
     motmodSheet.getRange("A:N").copyFrom(extractionSheet.getRange("B:O"), ExcelScript.RangeCopyType.values, false, false);
     // Nettoyage après copie
     extractionSheet.getRange().clear(ExcelScript.ClearApplyTo.all);
 }
 
-function formatMOTMODSheet(motmodSheet: ExcelScript.Worksheet, lastRow: number) {
+function formatMOTMODSheet(sheet: ExcelScript.Worksheet) {
     // Application des styles de bordure et de couleur
-    let range = motmodSheet.getRange("A1:N" + lastRow);
+    let range = sheet.getRange("A1:N" + sheet.getUsedRange().getLastRow().getRowIndex());
     applyBorders(range);
-    applyStyles(range);
+    applyStyles(sheet);
 }
 
 function applyBorders(range: ExcelScript.Range) {
@@ -80,7 +80,6 @@ function applyBorders(range: ExcelScript.Range) {
     const borderColor = "000000";
     const borderWeight = ExcelScript.BorderWeight.thin;
 
-    // Appliquer le style, la couleur et le poids à chaque bordure spécifique de la plage
     range.getFormat().getRangeBorder(ExcelScript.BorderIndex.insideHorizontal).setStyle(borderStyle);
     range.getFormat().getRangeBorder(ExcelScript.BorderIndex.insideVertical).setStyle(borderStyle);
     range.getFormat().getRangeBorder(ExcelScript.BorderIndex.edgeTop).setStyle(borderStyle);
@@ -103,20 +102,10 @@ function applyBorders(range: ExcelScript.Range) {
     range.getFormat().getRangeBorder(ExcelScript.BorderIndex.edgeRight).setWeight(borderWeight);
 }
 
-
 function applyStyles(sheet: ExcelScript.Worksheet) {
     // Mise en forme des cellules avec des couleurs spécifiques pour certaines cellules
-    const rangeA1 = sheet.getRange("A1");
-    rangeA1.getFormat().getFill().setColor("FFFF00"); // Jaune pour la première colonne
-
-    const cellM1 = sheet.getRange("M1");
-    cellM1.getFormat().getFill().setColor("FFC000"); // Couleur spécifique pour la cellule M1
-
-    const cellG1 = sheet.getRange("G1");
-    cellG1.getFormat().getFill().setColor("FFC000"); // Couleur spécifique pour la cellule G1
-
-    const rangeI1LastRow = sheet.getRange("I1:I" + sheet.getUsedRange().getLastRow().getRowIndex());
-    rangeI1LastRow.getFormat().getFill().setColor("DDEBF7"); // Couleur pour la plage de I1 à la dernière rangée de I
+    sheet.getRange("A1").getFormat().getFill().setColor("FFFF00"); // Jaune pour la première colonne
+    sheet.getRange("M1").getFormat().getFill().setColor("FFC000"); // Couleur spécifique pour la cellule M1
+    sheet.getRange("G1").getFormat().getFill().setColor("FFC000"); // Couleur spécifique pour la cellule G1
+    sheet.getRange("I1:I" + sheet.getUsedRange().getLastRow().getRowIndex()).getFormat().getFill().setColor("DDEBF7"); // Couleur pour la plage de I1 à la dernière rangée de I
 }
-
-
