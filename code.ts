@@ -38,20 +38,18 @@ function manageColumns(sheet: ExcelScript.Worksheet, lastRow: number) {
 }
 
 function manageSearchKeys(sheet: ExcelScript.Worksheet, lastRow: number) {
-    // Insertion et configuration de la colonne pour la clé de recherche
-    let keyColumn = sheet.getRange("A:A");
-    keyColumn.insert(ExcelScript.InsertShiftDirection.right); // Insère une nouvelle colonne à droite de A
-    sheet.getRange("A1").setFormulaLocal("concat"); // Définit une formule dans la première cellule
-
-    // Configure la formule de concaténation dans A2
+    // Ajout de clés de recherche
+    let keyRange = sheet.getRange("A:A");
+    keyRange.insert(ExcelScript.InsertShiftDirection.right);
+    sheet.getRange("A1").setFormulaLocal("concat");
     sheet.getRange("A2").setFormulaLocal("=concatener(E2;H2)");
+    let fillRange = sheet.getRange("A2:A" + lastRow); // Define the range to fill
 
-    // Définit la plage pour le remplissage automatique
-    let fillRange = sheet.getRange("A2:A" + lastRow);
-
-    // Applique le remplissage automatique sans utiliser AutoFillType
-    fillRange.autoFill(fillRange, "down"); // Remplissage vers le bas à partir de A2
+    // Ensure you are using the correct method to auto-fill
+    // If 'fillDown' is causing issues, try setting it explicitly like this:
+    fillRange.autoFill(fillRange, ExcelScript.AutoFillType.fillDown); // Correct autofill usage
 }
+
 
 function transferData(extractionSheet: ExcelScript.Worksheet, motmodSheet: ExcelScript.Worksheet, lastRow: number) {
     motmodSheet.getRange().clear(ExcelScript.ClearApplyTo.all);
