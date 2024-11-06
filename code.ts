@@ -38,11 +38,13 @@ function manageColumns(sheet: ExcelScript.Worksheet, lastRow: number) {
 }
 
 function manageSearchKeys(sheet: ExcelScript.Worksheet, lastRow: number) {
+    // Ajout de clés de recherche
     let keyRange = sheet.getRange("A:A");
     keyRange.insert(ExcelScript.InsertShiftDirection.right);
     sheet.getRange("A1").setFormulaLocal("concat");
     sheet.getRange("A2").setFormulaLocal("=concatener(E2;H2)");
-    sheet.getRange("A2:A" + lastRow).autoFill(ExcelScript.AutoFillType.fillDown);
+    let fillRange = sheet.getRange("A2:A" + lastRow); // Define the range to fill
+    fillRange.autoFill(ExcelScript.AutoFillType.fillDown); // Correct autofill usage
 }
 
 function transferData(extractionSheet: ExcelScript.Worksheet, motmodSheet: ExcelScript.Worksheet, lastRow: number) {
