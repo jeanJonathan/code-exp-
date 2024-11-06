@@ -43,11 +43,10 @@ function manageSearchKeys(sheet: ExcelScript.Worksheet, lastRow: number) {
     keyRange.insert(ExcelScript.InsertShiftDirection.right);
     sheet.getRange("A1").setFormulaLocal("concat");
     sheet.getRange("A2").setFormulaLocal("=concatener(E2;H2)");
-    let fillRange = sheet.getRange("A2:A" + lastRow); // Define the range to fill
+    let fillRange = sheet.getRange("A2:A" + lastRow); // Définissez la plage à remplir
 
-    // Ensure you are using the correct method to auto-fill
-    // If 'fillDown' is causing issues, try setting it explicitly like this:
-    fillRange.autoFill(fillRange, ExcelScript.AutoFillType.fillDown); // Correct autofill usage
+    // Assurez-vous d'utiliser correctement la méthode autoFill
+    fillRange.autoFill("A" + lastRow, ExcelScript.AutoFillType.fillDown); // Utilisation correcte d'autofill
 }
 
 
