@@ -104,11 +104,19 @@ function applyBorders(range: ExcelScript.Range) {
 }
 
 
-function applyStyles(range: ExcelScript.Range) {
-    // Mise en forme des cellules avec des couleurs
-    range.getFormat().getFill().setColor("FFFF00"); // Jaune pour la première colonne
-    range.getRange("M1").getFormat().getFill().setColor("FFC000"); // Autres couleurs spécifiques
-    range.getRange("G1").getFormat().getFill().setColor("FFC000");
+function applyStyles(sheet: ExcelScript.Worksheet) {
+    // Mise en forme des cellules avec des couleurs spécifiques pour certaines cellules
+    const rangeA1 = sheet.getRange("A1");
+    rangeA1.getFormat().getFill().setColor("FFFF00"); // Jaune pour la première colonne
+
+    const cellM1 = sheet.getRange("M1");
+    cellM1.getFormat().getFill().setColor("FFC000"); // Couleur spécifique pour la cellule M1
+
+    const cellG1 = sheet.getRange("G1");
+    cellG1.getFormat().getFill().setColor("FFC000"); // Couleur spécifique pour la cellule G1
+
+    const rangeI1LastRow = sheet.getRange("I1:I" + sheet.getUsedRange().getLastRow().getRowIndex());
+    rangeI1LastRow.getFormat().getFill().setColor("DDEBF7"); // Couleur pour la plage de I1 à la dernière rangée de I
 }
 
 
