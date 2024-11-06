@@ -62,7 +62,7 @@ function transferData(extractionSheet: ExcelScript.Worksheet, motmodSheet: Excel
     // Application de la formule de recherche V pour les commentaires
     let commentRange = extractionSheet.getRange("J2:J" + lastRow);
     commentRange.setFormulaLocal("=recherchev(A2;'MOTMOD'!A$1:O$" + lastRow + ";10; FAUX)");
-    commentRange.autoFill("J2:J" + lastRow, ExcelScript.AutoFillType.fillDown);
+    range.autoFill("B2:B" + lastRow, ExcelScript.AutoFillType.fillDown);
 
     // Nettoyage de la feuille d'extraction
     extractionSheet.getRange().clear(ExcelScript.ClearApplyTo.all);
@@ -73,22 +73,16 @@ function finalizeSheet(sheet: ExcelScript.Worksheet, lastRow: number) {
     applyBordersAndColors(sheet, lastRow);
 }
 
-function applyBordersAndColors(sheet: ExcelScript.Worksheet, lastRow: number) {
-    let range = sheet.getRange("A1:N" + lastRow);
+function applyBordersAndColors(range: ExcelScript.Range) {
     const borderStyle = ExcelScript.BorderLineStyle.continuous;
     const borderColor = "000000";
     const borderWeight = ExcelScript.BorderWeight.thin;
 
-    // Application des bordures
-    ['insideHorizontal', 'insideVertical', 'edgeTop', 'edgeBottom', 'edgeLeft', 'edgeRight'].forEach(border => {
-        range.getFormat().getRangeBorder(border).setStyle(borderStyle);
-        range.getFormat().getRangeBorder(border).setColor(borderColor);
-        range.getFormat().getRangeBorder(border).setWeight(borderWeight);
-    });
+    // Assurez-vous de passer les bonnes constantes pour les indices de bordure
+    range.getFormat().getRangeBorder(ExcelScript.BorderIndex.edgeTop).setStyle(borderStyle);
+    range.getFormat().getRangeBorder(ExcelScript.BorderIndex.edgeTop).setColor(borderColor);
+    range.getFormat().getRangeBorder(ExcelScript.BorderIndex.edgeTop).setWeight(borderWeight);
 
-    // Première colonne en jaune, autres couleurs spécifiques
-    range.getRange("A1").getFormat().getFill().setColor("FFFF00");
-    range.getRange("M1").getFormat().getFill().setColor("FFC000");
-    range.getRange("G1").getFormat().getFill().setColor("FFC000");
-    range.getRange("I1:I" + lastRow).getFormat().getFill().setColor("DDEBF7");
+    // Continuez avec les autres bordures en utilisant la même structure
 }
+
