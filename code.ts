@@ -40,11 +40,11 @@ function manageSearchKeys(sheet: ExcelScript.Worksheet, lastRow: number) {
     // Ajout de clés de recherche
     sheet.getRange("A:A").insert(ExcelScript.InsertShiftDirection.right);
     sheet.getRange("A1").setFormulaLocal("concat");
-    sheet.getRange("A2").setFormulaLocal("=concatener(E2;H2)");
 
-    // Correction: autoFill doit être appliqué correctement
-    let fillRange = sheet.getRange("A2:A" + lastRow);  // Définir explicitement la plage à remplir
-    fillRange.autoFill(sheet.getRange("A2:A" + lastRow), ExcelScript.AutoFillType.fillDown);  // Utiliser fillDown correctement
+    // Appliquer la formule manuellement sur chaque cellule de A2 à lastRow
+    for (let i = 2; i <= lastRow; i++) {
+        sheet.getRange("A" + i).setFormulaLocal("=concatener(E" + i + ";H" + i + ")");
+    }
 }
 
 
