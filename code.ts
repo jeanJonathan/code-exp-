@@ -1,57 +1,37 @@
-function main(workbook: ExcelScript.Workbook) {
-    const extractSheet = workbook.getWorksheet("Extract FCU");
-    const fcuHmuSheet = workbook.getWorksheet("FCU-HMU");
-    
-    // Préparation des données dans le fichier extract
-    prepareExtractData(extractSheet);
+Vue 1 : Détail par poste SAP
+Description :
 
-    // Transfert et mise à jour des données dans le fichier FCU-HMU
-    transferAndUpdateData(extractSheet, fcuHmuSheet);
+Chaque ligne correspond à un poste SAP unique. Les colonnes regroupent les informations sur les Pro Formas, BLs (avec quantités), et Factures. Les valeurs associées sont affichées dans des cellules concaténées.
 
-    // Finalisation et sauvegarde des modifications
-    finalizeUpdates(fcuHmuSheet);
-}
+Poste SAP	P/N	Désignation	Qté Commandée	Qté Livrée	To be delivered	BLs (Quantité)	Pro Formas (Quantité)	Factures (Quantité)	Shipping Date
+1234	0000021850	SCREW, CA	53	40	13	85686187(40)	100789790(40)	1088618(40)	2024-07-01
+5678	0000022670	SCREW, TA	50	25	25	85686187(25), 85655097(25)	100789790(50)	1093028(50)	2024-08-15
+9101	0000023202	SCREW	70	55	15	85734031(55)	100789791(55)	1099870(55)	2024-09-04
+1213	0000023520	SCREW	28	20	8	85655097(20)	100789792(20)	1088618(20)	2024-06-15
+Points clés :
 
-function prepareExtractData(sheet: ExcelScript.Worksheet) {
-    // Supprimer les zéros non nécessaires dans 'ID project SAP'
-    adjustProjectIDs(sheet);
-    // Ajoutez d'autres préparations de données si nécessaire
-}
+Les BLs sont concaténés dans une cellule unique pour un poste (avec les quantités livrées).
+Les Pro Formas et Factures sont également concaténés.
+Les colonnes comme Qté Commandée, Qté Livrée, et To be delivered affichent les quantités associées.
+Vue 2 : Regroupement par échéance
+Description :
 
-function adjustProjectIDs(sheet: ExcelScript.Worksheet) {
-    let range = sheet.getUsedRange();
-    let column = range.getColumn('E'); // Supposons que 'ID project SAP' est dans la colonne E
-    let values = column.getValues();
-    // Enlever les zéros initiaux
-    for (let i = 0; i < values.length; i++) {
-        values[i][0] = values[i][0].replace(/^0000/, '');
-    }
-    column.setValues(values);
-}
+Les données sont regroupées par échéance (Shipping Date ou autre date clé). Chaque ligne représente un regroupement pour une même échéance avec des détails sur les postes SAP associés.
 
-function transferAndUpdateData(extractSheet: ExcelScript.Worksheet, fcuHmuSheet: ExcelScript.Worksheet) {
-    // Utiliser les ID project SAP ajustés pour trouver des correspondances et mettre à jour les données
-    const lastRow = extractSheet.getUsedRange().getLastRow().getRowIndex();
-    for (let i = 2; i <= lastRow; i++) {
-        const extractID = extractSheet.getRange(`E${i}`).getText(); // ID de l'extractSheet
-        const comments = extractSheet.getRange(`T${i}`).getText(); // Supposons que les commentaires sont dans la colonne T
-        updateFcuHmuSheet(fcuHmuSheet, extractID, comments);
-    }
-}
+Shipping Date	Poste SAP	P/N	Qté Commandée	Qté Livrée	To be delivered	BLs (Quantité)	Pro Formas (Quantité)	Factures (Quantité)
+2024-07-01	1234	0000021850	53	40	13	85686187(40)	100789790(40)	1088618(40)
+2024-08-15	5678	0000022670	50	25	25	85686187(25), 85655097(25)	100789790(50)	1093028(50)
+2024-09-04	9101	0000023202	70	55	15	85734031(55)	100789791(55)	1099870(55)
+2024-06-15	1213	0000023520	28	20	8	85655097(20)	100789792(20)	1088618(20)
+Points clés :
 
-function updateFcuHmuSheet(fcuHmuSheet: ExcelScript.Worksheet, extractID: string, comments: string) {
-    const rows = fcuHmuSheet.getUsedRange().getRowCount();
-    for (let i = 2; i <= rows; i++) {
-        const fcuID = fcuHmuSheet.getRange(`E${i}`).getText(); // Supposons que 'ID project SAP' est aussi dans la colonne E
-        if (fcuID === extractID) {
-            fcuHmuSheet.getRange(`U${i}`).setValue(comments); // Mettre à jour la colonne 'Comments' dans FCU-HMU
-            // Mettre à jour d'autres colonnes au besoin
-            break;
-        }
-    }
-}
-
-function finalizeUpdates(sheet: ExcelScript.Worksheet) {
-    // Enregistrer le workbook ou faire d'autres nettoyages
-    console.log('Updates finalized.');
-}
+Chaque ligne correspond à une date spécifique (Shipping Date).
+Les BLs, Pro Formas, et Factures sont liés aux postes SAP concernés pour cette date.
+Les colonnes comme Qté Commandée et To be delivered affichent les totaux pour chaque ligne d’échéance.
+Résumé des différences entre les vues
+Vue 1 :
+Focus sur un poste SAP unique.
+Les informations des BLs, Pro Formas, et Factures sont concaténées dans des colonnes associées.
+Vue 2 :
+Regroupement par Shipping Date (ou échéance clé).
+Présente une vue synthétique par date, avec des détails consolidés.
