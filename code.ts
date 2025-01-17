@@ -1,4 +1,6 @@
-Détails des points clés :
+Le militaire (37 %), qui représente notre plus grande part de marché,
+Les travaux aériens utilitaires (16 %),
+Les missions VIP et corporate (11 %), ainsi que des applications critiques comme le transport médical d'urgence et la police parapublique (10 % chacun). des points clés :
 
 Numéro 1 mondial - moteurs :
 "Nous sommes numéro 1 mondial dans la conception et la production des moteurs d’avions commerciaux à fuselage étroit, grâce à un partenariat solide avec General Electric, ainsi que des moteurs à turbine pour hélicoptères, utilisés dans des missions critiques et variées."
