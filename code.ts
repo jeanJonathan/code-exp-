@@ -1,4 +1,16 @@
-Vue 1 : Détail par poste SAP
+Détails des points clés :
+
+Numéro 1 mondial - moteurs :
+"Nous sommes numéro 1 mondial dans la conception et la production des moteurs d’avions commerciaux à fuselage étroit, grâce à un partenariat solide avec General Electric, ainsi que des moteurs à turbine pour hélicoptères, utilisés dans des missions critiques et variées."
+Numéro 1 mondial - équipements intérieurs :
+"Nous excellons également dans l’aménagement intérieur des avions, qu’il s’agisse des avions régionaux ou d’affaires. Nos systèmes innovants de gestion des eaux et des déchets garantissent efficacité et durabilité à bord."
+Numéro 1 mondial - systèmes de support :
+"Dans le domaine des trains d’atterrissage, des roues et des freins carbone pour avions commerciaux, Safran se positionne également comme leader. Nous contribuons à la sécurité et au confort avec des technologies de pointe comme les toboggans d’évacuation."
+Numéro 1 en Europe - Défense et navigation :
+"En Europe, nous dominons dans les systèmes tactiques et de navigation inertielle, ainsi que dans les systèmes optroniques, démontrant notre expertise dans les technologies avancées pour la défense et la sécurité."
+Numéro 1 mondial - spatial :
+"Enfin, dans le domaine spatial, nos capteurs RF et modems permettent de maintenir les satellites en position et de contrôler les sondes spatiales. Nous sommes également reconnus pour notre optique spatiale de haute performance."
+ 1 : Détail par poste SAP
 Description :
 
 Chaque ligne correspond à un poste SAP unique. Les colonnes regroupent les informations sur les Pro Formas, BLs (avec quantités), et Factures. Les valeurs associées sont affichées dans des cellules concaténées.
