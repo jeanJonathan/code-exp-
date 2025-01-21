@@ -1,84 +1,104 @@
-function main(workbook: ExcelScript.Workbook) {
-  // 1. Récupération des feuilles nécessaires
-  const fcuSheet = workbook.getWorksheet("FCU"); // Feuille de destination
-  const extractionSheet = workbook.getWorksheet("Extraction FCU"); // Feuille source
+Étape 2 : Ajouter les colonnes calculées nécessaires
+1. Calcul de la date de validité de l’offre
 
-  // 2. Suppression des colonnes inutiles dans Extraction FCU
-  harmonizeColumns(extractionSheet, fcuSheet);
+Si la colonne DateValidité n’existe pas, calculez-la à partir de la date de création :
+DateValidité = 
+Table[SalesDocumentCreationDate] + 30
+2. Indiquer si l’offre est en cours
 
-  // 3. Création de la clé de concaténation dans les deux feuilles
-  createConcatKey(extractionSheet, "J", "L"); // OWNER_CODE (J) + Serial number (L)
-  createConcatKey(fcuSheet, "E", "F"); // OWNER_CODE (E) + Serial number (F)
+Créez une colonne calculée pour identifier les offres en cours :
+OffreEnCours = 
+IF(
+    Table[SalesDocumentCategoryCode] = "Quotation" &&
+    Table[SalesDocumentOverallProcessingStatusName] IN {"Not yet processed", "Partially processed"} &&
+    TODAY() <= Table[DateValidité],
+    "En cours",
+    "Non en cours"
+)
+3. Calcul des jours restants avant expiration
 
-  // 4. Récupération des commentaires avec une recherche V
-  retrieveComments(extractionSheet, fcuSheet);
+Ajoutez une colonne calculée pour afficher les jours restants avant expiration :
+JoursRestants = 
+DATEDIFF(TODAY(), Table[DateValidité], DAY)
+Étape 3 : Créer les mesures pour les KPI
+1. Nombre total d’offres en cours
 
-  // 5. Mise à jour de la feuille FCU avec les données de Extraction FCU
-  updateFcuSheet(fcuSheet, extractionSheet);
+NbOffresEnCours = 
+CALCULATE(
+    COUNTROWS(Table),
+    Table[OffreEnCours] = "En cours"
+)
+2. Montant total des offres en cours
 
-  // 6. Nettoyage des colonnes temporaires (concatKey)
-  cleanTemporaryColumns(fcuSheet, extractionSheet);
-}
+Si une colonne MontantTotal existe :
+MontantOffresEnCours = 
+CALCULATE(
+    SUM(Table[MontantTotal]),
+    Table[OffreEnCours] = "En cours"
+)
+3. Nombre d’offres par statut global
 
-// Fonction 1 : Harmonisation des colonnes (suppression des colonnes inutiles)
-function harmonizeColumns(extractionSheet: ExcelScript.Worksheet, fcuSheet: ExcelScript.Worksheet): void {
-  const fcuColumns = fcuSheet.getRange("1:1").getTexts()[0]; // Colonnes de FCU (ligne d'entête)
-  const extractionColumns = extractionSheet.getRange("1:1").getTexts()[0]; // Colonnes de Extraction FCU
+NbOffresParStatut =
+CALCULATE(
+    COUNTROWS(Table),
+    Table[SalesDocumentCategoryCode] = "Quotation",
+    Table[OffreEnCours] = "En cours"
+)
+Étape 4 : Construire les visualisations dans Power BI
+1. Histogramme des offres en cours par statut global
 
-  for (let i = extractionColumns.length - 1; i >= 0; i--) {
-    if (!fcuColumns.includes(extractionColumns[i])) {
-      extractionSheet.getRangeByIndexes(0, i, extractionSheet.getRowCount(), 1)
-        .delete(ExcelScript.DeleteShiftDirection.left);
-    }
-  }
-}
+Axes :
+X : SalesDocumentOverallProcessingStatusName (Not yet processed, Partially processed).
+Y : Nombre d’offres.
+Filtre :
+SalesDocumentCategoryCode = "Quotation".
+OffreEnCours = "En cours".
+Insights attendus :
+Visualiser la répartition des offres en cours selon leur statut.
+2. Carte de chaleur des délais restants par client
 
-// Fonction 2 : Création de la clé de concaténation
-function createConcatKey(sheet: ExcelScript.Worksheet, col1: string, col2: string): void {
-  // Insérer une colonne pour la clé de concaténation
-  sheet.getRange("A:A").insert(ExcelScript.InsertShiftDirection.right);
-  sheet.getRange("A1").setValue("concatKey");
+Axes :
+X : CustomerCompanyCustomerName (Nom client).
+Y : JoursRestants (jours avant expiration).
+Couleurs :
+Rouge : Offres expirant dans moins de 7 jours.
+Orange : Offres expirant dans 7 à 15 jours.
+Vert : Plus de 15 jours restants.
+Filtre :
+OffreEnCours = "En cours".
+Insights attendus :
+Identifier les clients ayant des offres urgentes.
+3. Tableau détaillé des offres en cours
 
-  // Formule de concaténation
-  sheet.getRange("A2").setFormulaLocal(`=CONCATENER(${col1}2;${col2}2)`);
+Colonnes :
+SalesDocumentID (identifiant de l’offre).
+CustomerCompanyCustomerName (nom du client).
+SalesDocumentCreationDate (date de création).
+DateValidité (date de validité calculée).
+JoursRestants (jours restants).
+SalesDocumentOverallProcessingStatusName (statut global).
+MontantTotal (si disponible).
+Filtres :
+OffreEnCours = "En cours".
+Insights attendus :
+Liste exploitable des offres valides, triée par priorité.
+4. KPI
 
-  // Autofill jusqu'à la dernière ligne
-  const lastRow = sheet.getUsedRange().getLastRow().getRowIndex();
-  sheet.getRange("A2").autoFill(`A2:A${lastRow + 1}`, ExcelScript.AutoFillType.fillFormulas);
-}
+Nombre total d’offres en cours.
+Montant total des offres en cours.
+Moyenne des jours restants :
+MoyenneJoursRestants =
+AVERAGEX(
+    FILTER(Table, Table[OffreEnCours] = "En cours"),
+    Table[JoursRestants]
+)
+Synthèse des visualisations
+Visualisation	Objectif	Insights attendus
+Histogramme par statut global	Répartir les offres selon leur statut global.	Identifier les offres partiellement traitées.
+Carte de chaleur des délais restants	Prioriser les offres proches de l’expiration.	Connaître les clients avec des offres urgentes.
+Tableau détaillé des offres en cours	Liste détaillée des offres valides.	Identifier les clients ou montants à forte priorité.
+KPI : Nombre et montant total des offres	Suivi global des offres en cours.	Visualiser rapidement les volumes et montants totaux.
+Étape suivante
+Configurez les relations dans Power BI, appliquez les formules DAX ci-dessus et construisez les visualisations suggérées. Une fois terminé, vous pourrez analyser vos données et répondre aux priorités des offres en cours.
 
-// Fonction 3 : Récupération des commentaires (ou autres données)
-function retrieveComments(extractionSheet: ExcelScript.Worksheet, fcuSheet: ExcelScript.Worksheet): void {
-  // Ajouter une colonne pour les commentaires rapatriés
-  const newColIndex = extractionSheet.getUsedRange().getColumnCount() + 1;
-  extractionSheet.getRangeByIndexes(0, newColIndex - 1, extractionSheet.getRowCount(), 1)
-    .insert(ExcelScript.InsertShiftDirection.right);
-  extractionSheet.getCell(0, newColIndex - 1).setValue("Comments_rapatriés");
-
-  // Formule RECHERCHEV
-  extractionSheet.getCell(1, newColIndex - 1).setFormulaLocal(
-    `=RECHERCHEV(A2;FCU!A:N;14;FAUX)` // Recherche colonne Comments (14ᵉ colonne)
-  );
-
-  // Autofill pour toute la colonne
-  const lastRow = extractionSheet.getUsedRange().getLastRow().getRowIndex();
-  extractionSheet.getRangeByIndexes(1, newColIndex - 1, lastRow, 1)
-    .autoFill(`${ExcelScript.Range.toLetter(newColIndex)}2:${ExcelScript.Range.toLetter(newColIndex)}${lastRow + 1}`, ExcelScript.AutoFillType.fillFormulas);
-}
-
-// Fonction 4 : Mise à jour de la feuille FCU
-function updateFcuSheet(fcuSheet: ExcelScript.Worksheet, extractionSheet: ExcelScript.Worksheet): void {
-  // Effacer les données existantes
-  fcuSheet.getRange().clear(ExcelScript.ClearApplyTo.all);
-
-  // Copier les données mises à jour de Extraction FCU
-  const extractionData = extractionSheet.getUsedRange();
-  fcuSheet.getRangeByIndexes(0, 0, extractionData.getRowCount(), extractionData.getColumnCount())
-    .copyFrom(extractionData, ExcelScript.RangeCopyType.values, false, false);
-}
-
-// Fonction 5 : Nettoyage des colonnes temporaires
-function cleanTemporaryColumns(fcuSheet: ExcelScript.Worksheet, extractionSheet: ExcelScript.Worksheet): void {
-  fcuSheet.getRange("A:A").delete(ExcelScript.DeleteShiftDirection.left); // Supprimer concatKey de FCU
-  extractionSheet.getRange("A:A").delete(ExcelScript.DeleteShiftDirection.left); // Supprimer concatKey de Extraction FCU
-}
+Si vous avez besoin d’aide pour configurer une visualisation ou ajuster les formules, je suis à votre disposition.
