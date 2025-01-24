@@ -1,8 +1,1 @@
-NbOffresRefusées =
-CALCULATE(
-    COUNTROWS(Table),
-    Table[SalesDocumentCategoryName] = "Quotation" && -- Type "Quotation"
-    ISBLANK(RELATED(SalesDocumentFlow[SalesDocumentFlowSubsequentDocumentID])) && -- Pas de commande associée
-    TODAY() > Table[SalesDocumentCreationDate] + 30 && -- Expirée
-    Table[SalesDocumentOverallProcessingStatusName] IN {"Not yet processed", "Partially processed"} -- Statut partiellement ou non traité
-)
+Ce tableau présente une analyse complète des performances des offres commerciales, incluant leur répartition par statut global (complètement traitées, partiellement traitées, ou non traitées), leur transformation en commandes, et leur état (en cours, expirées ou refusées). L
